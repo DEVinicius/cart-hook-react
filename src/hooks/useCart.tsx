@@ -48,7 +48,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
               message: 'Quantidade solicitada fora de estoque'
             })
 
-            return;
+            throw("Erro na adição do produto")
           }
 
           checkProductAlreadyExists.amount = checkProductAlreadyExists.amount + 1;
@@ -73,6 +73,12 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
 
   const removeProduct = (productId: number) => {
     try {
+      const findProduct = cart.find(product => product.id === productId);
+
+      if(!findProduct) {
+        throw("Erro na remoção do produto")
+      }
+
       const newCart = cart.filter(product => product.id != productId);
 
       localStorage.setItem("@RocketShoes:cart", JSON.stringify(newCart))
@@ -97,7 +103,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
       //search on api the stock
       const getProductStock = await api.get<Stock>(`/stock/${productId}`)
 
-      if(getProductStock.data.amount < amount) {
+      if(getProductStock.data.amount < amount || getProductStock.data.amount < 1) {
         showToast({
           type: 'error',
           message: 'Quantidade solicitada fora de estoque'
