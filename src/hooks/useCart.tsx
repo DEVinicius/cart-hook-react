@@ -40,6 +40,17 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
       const checkProductAlreadyExists = cart.find(product => product.id === productId);
 
       if(checkProductAlreadyExists) {
+          const getProductStock = await api.get<Stock>(`/stock/${productId}`)
+
+          if(getProductStock.data.amount < checkProductAlreadyExists.amount + 1) {
+            showToast({
+              type: 'error',
+              message: 'Quantidade solicitada fora de estoque'
+            })
+
+            return;
+          }
+
           checkProductAlreadyExists.amount = checkProductAlreadyExists.amount + 1;
           const newCart = cart.map(product => product.id === productId ? {
             ...product,
@@ -55,7 +66,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     } catch {
       showToast({
         type:"error",
-        message:"Falha ao Inserir Produto"
+        message:"Erro na adição do produto"
       })
     }
   };
@@ -73,7 +84,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     } catch {
       showToast({
         type: "error",
-        message: "falha ao remover produto"
+        message: "Erro na remoção do produto"
       })
     }
   };
@@ -89,7 +100,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
       if(getProductStock.data.amount < amount) {
         showToast({
           type: 'error',
-          message: 'Quantidade Indisponível'
+          message: 'Quantidade solicitada fora de estoque'
         })
 
         return;
@@ -105,7 +116,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     } catch {
       showToast({
         type:"error",
-        message:"Estoque Inválido"
+        message:"Erro na alteração de quantidade do produto"
       })
     }
   };

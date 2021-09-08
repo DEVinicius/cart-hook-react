@@ -25,19 +25,27 @@ const Home = (): JSX.Element => {
   const [products, setProducts] = useState<ProductFormatted[]>([]);
   const { addProduct, cart } = useCart();
 
-  const cartItemsAmount = cart.reduce((sumAmount, product) => {
-    return [product.amount]
-  }, [] as CartItemsAmount)
+  const [cartItemsAmount, setCartItemsAmount] = useState<CartItemsAmount>({} as CartItemsAmount);
+
+
+  
 
   useEffect(() => {
     async function loadProducts() {
       const loadProducts = await api.get("/products");
       setProducts(loadProducts.data);
 
+      const cartItems = cart.reduce((sumAmount, product) => {
+        sumAmount[product.id] = product.amount;
+        return sumAmount
+      }, {} as CartItemsAmount)
+
+      setCartItemsAmount(cartItems)
+
     }
 
     loadProducts();
-  }, []);
+  }, [,cart]);
 
   function handleAddProduct(id: number) {
     addProduct(id);
